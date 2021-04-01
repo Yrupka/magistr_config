@@ -1,6 +1,7 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Graph_3d : MonoBehaviour
 {
@@ -9,13 +10,15 @@ public class Graph_3d : MonoBehaviour
     private Transform rotator; // объект, который обеспечивает вращение графика
 
     private List<float> y_normalize;
-    private int x_count, y_count, z_count;
+    private int x_count, z_count;
     private float min, max;
 
     private int y_points; // количество точек по у (высота)
     private float height; // допустимая высота графика
     private float graph_offset; // расстояние подписей от графика
     private float line_offset; // расстояние линии от графика
+
+    Vector3[] vertices;
 
     public Gradient gradient;
     public GameObject text;
@@ -26,20 +29,19 @@ public class Graph_3d : MonoBehaviour
     {
         rotator = transform.parent;
         mesh = new Mesh();
-        GetComponent<MeshFilter>().mesh = mesh;
+        GetComponent<MeshFilter>().mesh = mesh;  
 
-        // List<float> random = new List<float>();
-        // for (int i = 0; i < 25; i++)
-        //     random.Add(Random.Range(5f, 7f));
+        List<float> x = new List<float>();
+        List<float> random = new List<float>();
+        List<float> z = new List<float>();
+        for (int i = 0; i < 10; i++)
+        {
+            random.Add(Random.Range(0f, 40f));
+        }
+        x.AddRange(new List<float>(){1000, 1000, 1400, 2000, 2000, 2000, 5000, 5500});
+        z.AddRange(new List<float>(){10, 11, 22, 5, 33, 13, 44, 26});
 
-        // List<float> x = new List<float>();
-        // List<float> z = new List<float>();
-        // for (int i = 0; i < 5; i++)
-        // {
-        //     x.Add(i);
-        //     z.Add(i);
-        // }
-        // Create_graph(x, random, z);
+        Create_graph(x, random, z);
     }
 
     void Update()
@@ -64,9 +66,6 @@ public class Graph_3d : MonoBehaviour
         max = Mathf.Max(y.ToArray());
         min = Mathf.Min(y.ToArray());
 
-        x_count = x.Count;
-        y_count = y.Count;
-        z_count = z.Count;
         y_normalize = new List<float>();
 
         y_points = 4;
@@ -78,7 +77,13 @@ public class Graph_3d : MonoBehaviour
             y_normalize.Add(item / max * height);
 
         Clear_objects();
-        Create_graph_object();
+        Create_graph_object(x, z);
+
+        x = x.Distinct().ToList(); // удаление дубликатов
+        z = z.Distinct().ToList();
+        x_count = x.Count;
+        z_count = z.Count;
+
         Set_position();
         Create_labels(x, z);
         Create_lines();
@@ -112,6 +117,7 @@ public class Graph_3d : MonoBehaviour
         }
 
         //z
+        z_data.Sort();
         for (int i = 0; i < z_data.Count; i++)
         {
             GameObject instanse = Instantiate(text, rotator);
@@ -196,61 +202,107 @@ public class Graph_3d : MonoBehaviour
         }
     }
 
-    private void Create_graph_object()
+    private void Create_graph_object(List<float> x, List<float> z)
     {
-        int x_size = x_count / 2 - 1;
-        int z_size = z_count / 2 - 1;
+        // x - обороты (отсортированы по неубыванию), z - нагрузка
 
-        // опорные точки
-        Vector3[] vertices = new Vector3[(x_size + 1) * (z_size + 1)];
+        // int x_size = x_count / 2 - 1;
+        // int z_size = z_count / 2 - 1;
 
-        for (int i = 0, x = 0; x <= x_size; x++)
-            for (int z = 0; z <= z_size; z++)
-            {
-                vertices[i] = new Vector3(x, y_normalize[i], z);
-                i++;
-            }
-        // треугольники между точками
-        int[] triangles = new int[x_size * z_size * 6];
-        int vert = 0;
-        int tris = 0;
+        // // опорные точки
+        // Vector3[] vertices = new Vector3[(x_size + 1) * (z_size + 1)];
 
-        for (int x = 0; x < x_size; x++)
+        // for (int i = 0, x = 0; x <= x_size; x++)
+        //     for (int z = 0; z <= z_size; z++)
+        //     {
+        //         vertices[i] = new Vector3(x, y_normalize[i], z);
+        //         i++;
+        //     }
+        // // треугольники между точками
+        // int[] triangles = new int[x_size * z_size * 6];
+        // int vert = 0;
+        // int tris = 0;
+
+        // for (int x = 0; x < x_size; x++)
+        // {
+        //     for (int z = 0; z < z_size; z++)
+        //     {
+        //         // создание двух треугольников, образующих квадрат (основной объект)
+        //         triangles[tris + 0] = vert + x_size + 2;
+        //         triangles[tris + 1] = vert + x_size + 1;
+        //         triangles[tris + 2] = vert + 1;
+        //         triangles[tris + 3] = vert + 1;
+        //         triangles[tris + 4] = vert + x_size + 1;
+        //         triangles[tris + 5] = vert;
+        //         vert++;
+        //         tris += 6;
+        //     }
+        //     vert++; // удаляет разрыв первого и последнего треугольника
+        // }
+
+        // // цвет графика
+        // colors = new Color[vertices.Length];
+        // float fake_min = Mathf.Min(y_normalize.ToArray());
+        // float fake_max = Mathf.Max(y_normalize.ToArray());
+        // for (int i = 0, x = 0; x <= x_size; x++)
+        //     for (int z = 0; z <= z_size; z++)
+        //     {
+        //         float height_val = Mathf.InverseLerp(fake_min, fake_max, vertices[i].y);
+        //         colors[i] = gradient.Evaluate(height_val);
+        //         i++;
+        //     }
+
+        int x_size = x.Count;
+        int z_size = z.Count;
+
+        vertices = new Vector3[x_size * z_size];
+        Vector2[] vertices_2d = new Vector2[x_size * z_size];
+
+        // в каждой ячейке хранится количество одинаковых оборотов
+        // каждая ячейка разное число оборотов
+        List<int> x_pos = new List<int>(1){1};
+        float curr = x[0];
+        for (int i = 1, pos = 0; i < x_size; i++)
         {
-            for (int z = 0; z < z_size; z++)
+            if (x[i] == curr)
+                x_pos[pos]++;
+            else
             {
-                // создание двух треугольников, образующих квадрат (основной объект)
-                triangles[tris + 0] = vert + x_size + 2;
-                triangles[tris + 1] = vert + x_size + 1;
-                triangles[tris + 2] = vert + 1;
-                triangles[tris + 3] = vert + 1;
-                triangles[tris + 4] = vert + x_size + 1;
-                triangles[tris + 5] = vert;
-                vert++;
-                tris += 6;
+                x_pos.Add(1);
+                pos++;
+                curr = x[i];
             }
-            vert++; // удаляет разрыв первого и последнего треугольника
         }
 
-        // цвет графика
-        colors = new Color[vertices.Length];
-        float fake_min = Mathf.Min(y_normalize.ToArray());
-        float fake_max = Mathf.Max(y_normalize.ToArray());
-        for (int i = 0, x = 0; x <= x_size; x++)
-            for (int z = 0; z <= z_size; z++)
+        for (int i = 0; i < x_pos.Count; i++)
+        {
+            for (int j = 0; j < x_pos[i]; j++)
             {
-                float height_val = Mathf.InverseLerp(fake_min, fake_max, vertices[i].y);
-                colors[i] = gradient.Evaluate(height_val);
-                i++;
+                vertices[i] = new Vector3(i, y_normalize[i], j);
+                vertices_2d[i] = new Vector2(i, j);
+                Debug.Log(vertices_2d[i]);
             }
+        }
 
-        mesh.Clear();
-        mesh.subMeshCount = 2; // 2 меша, 0 - основная текстура с градиентом, 1 - черные линии
-        mesh.vertices = vertices;
-        mesh.SetTriangles(triangles, 0);
-        mesh.colors = colors;
-        mesh.RecalculateNormals();
+        //Triangulator tr = new Triangulator(vertices_2d);
+        //int[] triangles = tr.Triangulate();
 
-        mesh.SetIndices(triangles, MeshTopology.Lines, 1);
+        //mesh.Clear();
+        // mesh.subMeshCount = 2; // 2 меша, 0 - основная текстура с градиентом, 1 - черные линии
+        //mesh.vertices = vertices;
+        //mesh.triangles = triangles;
+        // mesh.colors = colors;
+        //mesh.RecalculateNormals();
+        //mesh.RecalculateBounds();
+
+        // mesh.SetIndices(triangles, MeshTopology.Lines, 1);
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (vertices == null)
+            return;
+        for (int i = 0; i < vertices.Length; i++)
+            Gizmos.DrawSphere(vertices[i], 0.1f);
     }
 }
