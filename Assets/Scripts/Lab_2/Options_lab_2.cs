@@ -31,8 +31,8 @@ public class Options_lab_2 : MonoBehaviour
     private void Awake() // нахождение всех полей
     {
         table = transform.Find("Table").GetComponent<Table_lab_2>();
-        transform.Find("Graph_save_setting").GetComponent<Button>().onClick.AddListener(() => StartCoroutine(Save_dialog()));
-        transform.Find("Graph_load_setting").GetComponent<Button>().onClick.AddListener(() => StartCoroutine(Load_dialog()));
+        transform.Find("Table_save").GetComponent<Button>().onClick.AddListener(() => StartCoroutine(Save_dialog()));
+        transform.Find("Table_load").GetComponent<Button>().onClick.AddListener(() => StartCoroutine(Load_dialog()));
         transform.Find("Graph_update").GetComponent<Button>().onClick.AddListener(Graph_update);
         input_m = transform.Find("Input_1").GetComponent<InputField>();
         input_l = transform.Find("Input_2").GetComponent<InputField>();
@@ -118,28 +118,6 @@ public class Options_lab_2 : MonoBehaviour
         questions.Set_questions(options.questions);
     }
 
-    IEnumerator Save_dialog()
-	{
-        FileBrowser.SetDefaultFilter( ".txt" );
-		yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.Files, false, null, "таблица_1.txt", "Сохранить файл данных", "Сохранить" );
-
-		if(FileBrowser.Success)
-            File_controller.Save_table_lab_2(table.GetItems(), FileBrowser.Result[0]);
-    }
-
-    IEnumerator Load_dialog()
-	{
-        FileBrowser.SetDefaultFilter( ".txt" );
-		yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.Files, false, null, null, "Выберите файл для загрузки", "Загрузить" );
-
-		if(FileBrowser.Success)
-        {
-            string[,] data = File_controller.Load_table_lab_2(FileBrowser.Result[0]);
-            if (data != null) // вставить всплывающее окно об ошибке
-                table.AddMany(data);
-        }
-    }
-
     private void Graph_update()
     {
         string[,] data = table.GetItems();
@@ -163,6 +141,28 @@ public class Options_lab_2 : MonoBehaviour
             load.Add(item.load);
         }
         graph.Create_graph(rpm, deg, load);
+    }
+
+    IEnumerator Save_dialog()
+	{
+        FileBrowser.SetDefaultFilter( ".txt" );
+		yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.Files, false, null, "таблица_1.txt", "Сохранить файл данных", "Сохранить" );
+
+		if(FileBrowser.Success)
+            File_controller.Save_table(table.GetItems(), FileBrowser.Result[0]);
+    }
+
+    IEnumerator Load_dialog()
+	{
+        FileBrowser.SetDefaultFilter( ".txt" );
+		yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.Files, false, null, null, "Выберите файл для загрузки", "Загрузить" );
+
+		if(FileBrowser.Success)
+        {
+            string[,] data = File_controller.Load_table(FileBrowser.Result[0], 2);
+            if (data != null) // вставить всплывающее окно об ошибке
+                table.AddMany(data);
+        }
     }
 
     public void Set_profile(Engine_options_lab_2 profile)

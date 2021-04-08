@@ -91,28 +91,40 @@ public static class File_controller
         return (options, json.get_profile());
     }
 
-    public static void Save_table_lab_2(string[,] data, string path)
+    public static void Save_table(string[,] data, string path)
     {
-        string str = "Обороты\tМомент\tРасход\tУгол\tНагрузка\n";
+        string str = "Обороты\tМомент\tРасход\t";
+        int count_rows = data.GetLength(1);
+
+        if (count_rows == 5) // таблица второй лабораторной, 5 строк
+            str += "Угол\tНагрузка\n";
+        
         for (int i = 0; i < data.GetLength(0); i++)
         {
-            for (int j = 0; j < 4; j++)
-                str += data[i, j] + "\t";
-            str += data[i, 4] + '\n';
+            for (int j = 0; j < count_rows - 1; j++)
+                str += data[i, j] + '\t';
+            str += data[i, count_rows - 1] + '\n';
         }
         File.WriteAllText(path, str, Encoding.Unicode);
     }
 
-    public static string[,] Load_table_lab_2(string path)
+    public static string[,] Load_table(string path, int lab_num)
     {
         string[] strings = File.ReadAllLines(path, Encoding.Unicode);
-        string[,] data = new string[strings.Length - 1, 5];
+        int count_rows;
+
+        if (lab_num == 1)
+            count_rows = 3;
+        else
+            count_rows = 5;
+
+        string[,] data = new string[strings.Length - 1, count_rows];
 
         // на первом месте надписи
         for (int i = 1; i < strings.Length; i++)
         {
             string[] str = strings[i].Split('\t');
-            if (str.Length != 5)
+            if (str.Length != count_rows) // пропускает не корректные строки
                 continue;
             for (int j = 0; j < str.Length; j++)
                 data[i - 1, j] = str[j];
@@ -120,7 +132,7 @@ public static class File_controller
         return data;
     }
 
-    public static void Save_questions(string [,] data, string path)
+    public static void Save_questions(string[,] data, string path)
     {
         string str = "Номер\nБалл\nТекст\nОтветы\n";
         for (int i = 0; i < data.GetLength(0); i++)
@@ -146,12 +158,12 @@ public static class File_controller
             i += 2;
             if (i >= strings.Length)
                 goto x;
-            while(!string.IsNullOrEmpty(strings[i]))
+            while (!string.IsNullOrEmpty(strings[i]))
             {
                 answers += strings[i] + '\n';
                 i++;
             }
-            x:
+        x:
             item[2] = answers;
             raw_data.Add(item);
             count++;

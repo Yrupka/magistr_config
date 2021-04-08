@@ -2,6 +2,8 @@
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using SimpleFileBrowser;
+using System.Collections;
 
 public class Options_lab_1 : MonoBehaviour
 {
@@ -29,6 +31,8 @@ public class Options_lab_1 : MonoBehaviour
     private void Awake() // нахождение всех полей
     {
         table = transform.Find("Table").GetComponent<Table_lab_1>();
+        transform.Find("Table_save").GetComponent<Button>().onClick.AddListener(() => StartCoroutine(Save_dialog()));
+        transform.Find("Table_load").GetComponent<Button>().onClick.AddListener(() => StartCoroutine(Load_dialog()));
         table.Add_listener_update_first(() => Graph_update(2));
         table.Add_listener_update_second(() => Graph_update(0));
         table.Add_listener_update_third(() => Graph_update(1));
@@ -131,6 +135,28 @@ public class Options_lab_1 : MonoBehaviour
         {
             graph_options.rpms.Sort((a, b) => a.rpm.CompareTo(b.rpm));
             graph.Calculate_graphs(graph_options, graph_num);
+        }
+    }
+
+    IEnumerator Save_dialog()
+	{
+        FileBrowser.SetDefaultFilter( ".txt" );
+		yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.Files, false, null, "таблица_1.txt", "Сохранить файл данных", "Сохранить" );
+
+		if(FileBrowser.Success)
+            File_controller.Save_table(table.GetItems(), FileBrowser.Result[0]);
+    }
+
+    IEnumerator Load_dialog()
+	{
+        FileBrowser.SetDefaultFilter( ".txt" );
+		yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.Files, false, null, null, "Выберите файл для загрузки", "Загрузить" );
+
+		if(FileBrowser.Success)
+        {
+            string[,] data = File_controller.Load_table(FileBrowser.Result[0], 1);
+            if (data != null) // вставить всплывающее окно об ошибке
+                table.AddMany(data);
         }
     }
 

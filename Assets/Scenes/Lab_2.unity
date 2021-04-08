@@ -98,7 +98,7 @@ LightmapSettings:
     m_TrainingDataDestination: TrainingData
     m_LightProbeSampleCountMultiplier: 4
   m_LightingDataAsset: {fileID: 0}
-  m_UseShadowmask: 0
+  m_UseShadowmask: 1
 --- !u!196 &4
 NavMeshSettings:
   serializedVersion: 2
@@ -1448,7 +1448,7 @@ GameObject:
   - component: {fileID: 140931867}
   - component: {fileID: 140931866}
   m_Layer: 5
-  m_Name: Graph_save_setting
+  m_Name: Table_save
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3239,7 +3239,7 @@ GameObject:
   - component: {fileID: 464385075}
   - component: {fileID: 464385074}
   m_Layer: 5
-  m_Name: Graph_load_setting
+  m_Name: Table_load
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6787,7 +6787,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 341106684}
   m_Direction: 2
   m_Value: 0
-  m_Size: 0.27157462
+  m_Size: 0.54314923
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -7188,7 +7188,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1466386154}
   m_Direction: 0
   m_Value: 0
-  m_Size: 0.32541665
+  m_Size: 0.645
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -13356,7 +13356,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 209.5, y: 128.26999}
+  m_AnchoredPosition: {x: 213, y: 128.26999}
   m_SizeDelta: {x: 1200, y: 561.54}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &6983081887865668480
