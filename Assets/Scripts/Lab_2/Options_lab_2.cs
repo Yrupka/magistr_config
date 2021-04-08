@@ -120,7 +120,8 @@ public class Options_lab_2 : MonoBehaviour
 
     IEnumerator Save_dialog()
 	{
-		yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.Files, false, null, "table_1.txt", "Сохранить файл данных", "Сохранить" );
+        FileBrowser.SetDefaultFilter( ".txt" );
+		yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.Files, false, null, "таблица_1.txt", "Сохранить файл данных", "Сохранить" );
 
 		if(FileBrowser.Success)
             File_controller.Save_table_lab_2(table.GetItems(), FileBrowser.Result[0]);
@@ -128,6 +129,7 @@ public class Options_lab_2 : MonoBehaviour
 
     IEnumerator Load_dialog()
 	{
+        FileBrowser.SetDefaultFilter( ".txt" );
 		yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.Files, false, null, null, "Выберите файл для загрузки", "Загрузить" );
 
 		if(FileBrowser.Success)
@@ -140,15 +142,25 @@ public class Options_lab_2 : MonoBehaviour
 
     private void Graph_update()
     {
+        string[,] data = table.GetItems();
+        List<Engine_options_lab_2.struct_rpms> str = new List<Engine_options_lab_2.struct_rpms>(data.GetLength(0));
+        
+        // сортировка
+        for (int i = 0; i < data.GetLength(0); i++)
+            str.Add(new Engine_options_lab_2.struct_rpms(int.Parse(data[i, 0]), 0f, 0f,
+                float.Parse(data[i, 3]), float.Parse(data[i, 4])));
+        if (str.Count != 0)
+            str.Sort((a, b) => a.rpm.CompareTo(b.rpm));
+        
+        // подготовка массив для создания графика
         List<float> rpm = new List<float>();
         List<float> deg = new List<float>();
         List<float> load = new List<float>();
-        string[,] data = table.GetItems();
-        for (int i = 0; i < data.GetLength(0); i++)
+        foreach (Engine_options_lab_2.struct_rpms item in str)
         {
-            rpm.Add(float.Parse(data[i, 0]));
-            deg.Add(float.Parse(data[i, 3]));
-            load.Add(float.Parse(data[i, 4]));
+            rpm.Add(item.rpm);
+            deg.Add(item.deg);
+            load.Add(item.load);
         }
         graph.Create_graph(rpm, deg, load);
     }

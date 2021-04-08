@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -10,6 +9,11 @@ public class Graph_3d : MonoBehaviour
     private Transform rotator; // объект, который обеспечивает вращение графика
 
     private List<float> y_normalize;
+    private struct dot
+    {
+        public float x;
+        public float y;
+    };
 
     // изменяемые параметры
     private int y_points; // количество промежуточных точек по у (высота)
@@ -17,6 +21,7 @@ public class Graph_3d : MonoBehaviour
     private float graph_offset; // расстояние подписей от графика
     private float line_offset; // расстояние линии от графика
     private float step_min_x, step_min_z; // минимальное расстояние между точками
+    private string label_x, label_y, label_z; // названия осей
 
     Vector3[] vertices;
 
@@ -24,6 +29,7 @@ public class Graph_3d : MonoBehaviour
     public GameObject text;
     public GameObject line;
     public Camera cam;
+    public GameObject cube;
 
     void Start()
     {
@@ -31,19 +37,18 @@ public class Graph_3d : MonoBehaviour
         mesh = new Mesh();
         GetComponent<MeshFilter>().mesh = mesh;
 
-        List<float> x = new List<float>();
-        List<float> random = new List<float>();
-        List<float> z = new List<float>();
-        int x_c = Random.Range(1, 100);
-        Debug.Log(x_c);
-        for (int i = 0; i < x_c; i++)
-        {
-            x.Add(1000f * Random.Range(1, 7));
-            random.Add(Random.Range(0f, 40f));
-            z.Add(10f * Random.Range(1f, 5f));
-        }
+        // List<float> x = new List<float>();
+        // List<float> random = new List<float>();
+        // List<float> z = new List<float>();
+        // int x_c = Random.Range(5, 100);
+        // for (int i = 0; i < x_c; i++)
+        // {
+        //     x.Add(1000f * Random.Range(1, 7));
+        //     random.Add(Random.Range(0f, 40f));
+        //     z.Add(10f * Random.Range(1f, 5f));
+        // }
 
-        x.Sort();
+        // x.Sort();
 
         y_normalize = new List<float>();
         y_points = 4;
@@ -52,8 +57,11 @@ public class Graph_3d : MonoBehaviour
         line_offset = 0.4f;
         step_min_x = 0.1f;
         step_min_z = 0.1f;
+        label_x = "Обороты";
+        label_y = "Нагрузка";
+        label_z = "Угол опережения";
 
-        Create_graph(x, random, z);
+        //Create_graph(x, random, z);
     }
 
     void Update()
@@ -126,9 +134,12 @@ public class Graph_3d : MonoBehaviour
     private void Set_position(int length_x, int length_z)
     {
         float fake_min = Mathf.Min(y_normalize.ToArray());
-        //transform.localPosition = new Vector3(-length_x / 2, -fake_min, -length_z / 2);
+        transform.localPosition = new Vector3(-length_x / 2, -fake_min, -length_z / 2);
         cam.transform.localPosition = new Vector3(-length_x / 2 - 2, height / 2, -length_z / 2 - 2);
         cam.transform.rotation = Quaternion.Euler(new Vector3(15f, 45f, 0f));
+        // плоскость, чтобы заслонять ненужные части графика
+        cube.transform.localScale = new Vector3(length_x, 1, length_z);
+        cube.transform.localPosition = new Vector3(-line_offset, -fake_min - 0.5f, -line_offset);
     }
 
     // создает подписи осей
@@ -139,6 +150,11 @@ public class Graph_3d : MonoBehaviour
         int length_x, int length_z)
     {
         // x
+        GameObject lab_x = Instantiate(text, transform);
+        lab_x.GetComponent<TextMesh>().text = label_x;
+        lab_x.GetComponent<TextMesh>().anchor = TextAnchor.UpperLeft;
+        lab_x.transform.localPosition = new Vector3(1f, 0f, -(line_offset + graph_offset));
+
         for (int i = 0; i < length_x; i++)
         {
             GameObject instanse = Instantiate(text, transform);
@@ -147,6 +163,12 @@ public class Graph_3d : MonoBehaviour
         }
 
         //z
+        GameObject lab_z = Instantiate(text, transform);
+        lab_z.GetComponent<TextMesh>().text = label_z;
+        lab_z.GetComponent<TextMesh>().anchor = TextAnchor.UpperRight;
+        lab_z.transform.localPosition = new Vector3(-(line_offset + graph_offset), 0f, 1f);
+        lab_z.transform.Rotate(Vector3.up, 90);
+
         for (int i = 0; i < length_z; i++)
         {
             GameObject instanse = Instantiate(text, transform);
@@ -156,12 +178,17 @@ public class Graph_3d : MonoBehaviour
         }
 
         //y
+        float y_offset = Mathf.Sqrt(Mathf.Pow(graph_offset, 2) * 2f) / 1.5f; // отступ от графика на расстояние гипотенузы треугольника со сторонами отступа
+        GameObject lab_y = Instantiate(text, transform);
+        lab_y.GetComponent<TextMesh>().text = label_y;
+        lab_y.transform.localPosition = new Vector3(-(y_offset + 0.2f), 0.5f,-(y_offset + 0.2f));
+        lab_y.transform.Rotate(Vector3.up, 45);
+
         float step = height / y_points;
         for (int i = 0; i < y_points; i++)
         {
             GameObject instanse = Instantiate(text, transform);
             instanse.transform.Rotate(Vector3.up, 45);
-            float y_offset = Mathf.Sqrt(Mathf.Pow(graph_offset, 2) * 2f) / 1.5f; // отступ от графика на расстояние гипотенузы треугольника со сторонами отступа
             Vector3 position = new Vector3(-y_offset, 0, -y_offset);
 
             position.y = i * step + instanse.transform.localScale.y * 1.5f; // + половина высоты текста
@@ -219,92 +246,107 @@ public class Graph_3d : MonoBehaviour
     {
         // x - обороты (отсортированы по неубыванию), z - нагрузка
 
-        // int x_size = x_count / 2 - 1;
-        // int z_size = z_count / 2 - 1;
+        int diff_dots = x.Distinct().Count();
+        List<dot>[] dots = new List<dot>[diff_dots + 1];
+        for (int i = 0; i < diff_dots + 1; i++)
+            dots[i] = new List<dot>();
 
-        // // опорные точки
-        // Vector3[] vertices = new Vector3[(x_size + 1) * (z_size + 1)];
+        int max_dot_count = 0;
+        float curr = x[0];
 
-        // for (int i = 0, x = 0; x <= x_size; x++)
-        //     for (int z = 0; z <= z_size; z++)
-        //     {
-        //         vertices[i] = new Vector3(x, y_normalize[i], z);
-        //         i++;
-        //     }
-
-        // // цвет графика
-        // colors = new Color[vertices.Length];
-        // float fake_min = Mathf.Min(y_normalize.ToArray());
-        // float fake_max = Mathf.Max(y_normalize.ToArray());
-        // for (int i = 0, x = 0; x <= x_size; x++)
-        //     for (int z = 0; z <= z_size; z++)
-        //     {
-        //         float height_val = Mathf.InverseLerp(fake_min, fake_max, vertices[i].y);
-        //         colors[i] = gradient.Evaluate(height_val);
-        //         i++;
-        //     }
-
-        int x_size = x.Count;
-        //step_x; length_x;
-
-        vertices = new Vector3[x_size];
-
-        // в каждой ячейке хранится количество одинаковых оборотов
-        // каждая ячейка разное число оборотов
-        // List<int> x_pos = new List<int>(1){1};
-        // float curr = x[0];
-        // for (int i = 1, pos = 0; i < arr_length; i++)
-        // {
-        //     if (x[i] == curr)
-        //         x_pos[pos]++;
-        //     else
-        //     {
-        //         x_pos.Add(1);
-        //         pos++;
-        //         curr = x[i];
-        //     }
-        // }
-
-        int count = 0;
-        for (int i = 0; i < x_size; i++)
+        // распределение точек на каждое отдельное число оборотов
+        for (int i = 0, pos = 0; i < x.Count; i++)
         {
-            float xx = Mathf.InverseLerp(x.Min(), x.Max(), x[i]);
-            float zz = Mathf.InverseLerp(z.Min(), z.Max(), z[i]);
-            vertices[count] = new Vector3(Mathf.Lerp(0f, length_x - 1, xx), y_normalize[i], Mathf.Lerp(0f, length_z - 1, zz));
-            count++;
+            if (x[i] != curr)
+            {
+                pos++;
+                curr = x[i];
+                if (dots[pos - 1].Count > max_dot_count)
+                    max_dot_count = dots[pos - 1].Count;
+            }
+            dots[pos].Add(new dot() { x = z[i], y = y_normalize[i] });
+        }
+
+        // сортировка по возрастанию полученных точек
+        for (int i = 0; i < diff_dots; i++)
+            dots[i].Sort((a, b) => a.x.CompareTo(b.x));
+
+        // добавление дополнительных точек для получения равных массивов
+        for (int i = 0; i < diff_dots; i++)
+        {
+            int dots_to_add = max_dot_count - dots[i].Count;
+            for (int j = 0; j < dots_to_add; j++)
+                dots[i].Add(new dot() { x = dots[i].Last().x, y = dots[i].Last().y });
+            dots[i].Add(new dot() { x = dots[i].Last().x, y = dots[i].Last().y });
+        }
+        dots.Last().AddRange(dots[diff_dots - 1]);
+
+        int vert_size = (diff_dots + 1) * (max_dot_count + 1);
+        vertices = new Vector3[vert_size];
+        List<float> x_new = x.Distinct().ToList();
+        x_new.Add(x_new.Last()); // дубль последнего
+        Debug.Log((diff_dots + 1) * (max_dot_count + 1));
+        Debug.Log(diff_dots.ToString() + " " + max_dot_count.ToString());
+
+        // создание опорных точек для графика
+        for (int i = 0, count = 0; i <= diff_dots; i++)
+        {
+            for (int j = 0; j < dots[i].Count; j++)
+            {
+                if (count > vert_size)
+                    break;
+                float zz = Mathf.InverseLerp(dots[i].Min((a) => a.x), dots[i].Max((a) => a.x), dots[i][j].x);
+                float xx = Mathf.InverseLerp(x_new.Min(), x_new.Max(), x_new[i]);
+                vertices[count] = new Vector3(Mathf.Lerp(0f, length_x - 1, xx), dots[i][j].y, Mathf.Lerp(0f, length_z - 1, zz));
+                count++;
+            }
         }
 
         // треугольники между точками
-        int[] triangles = new int[x_size * z_size * 6];
+        int[] triangles = new int[max_dot_count * diff_dots * 6];
         int vert = 0;
         int tris = 0;
 
-        for (int x = 0; x < x_size; x++)
+        for (int i = 0; i < diff_dots; i++)
         {
-            for (int z = 0; z < z_size; z++)
+            for (int j = 0; j < max_dot_count; j++)
             {
                 // создание двух треугольников, образующих квадрат (основной объект)
-                triangles[tris + 0] = vert + x_size + 2;
-                triangles[tris + 1] = vert + x_size + 1;
-                triangles[tris + 2] = vert + 1;
-                triangles[tris + 3] = vert + 1;
-                triangles[tris + 4] = vert + x_size + 1;
-                triangles[tris + 5] = vert;
+                triangles[tris + 0] = vert + 1;
+                triangles[tris + 1] = vert + max_dot_count + 1;
+                triangles[tris + 2] = vert;
+                triangles[tris + 3] = vert + max_dot_count + 1;
+                triangles[tris + 4] = vert + 1;
+                triangles[tris + 5] = vert + max_dot_count + 2;
                 vert++;
                 tris += 6;
             }
             vert++; // удаляет разрыв первого и последнего треугольника
         }
 
+        // // цвет графика
+        colors = new Color[vertices.Length];
+        float fake_min = Mathf.Min(y_normalize.ToArray());
+        float fake_max = Mathf.Max(y_normalize.ToArray());
+        for (int i = 0, count = 0; i <= diff_dots; i++)
+            for (int j = 0; j <= max_dot_count; j++)
+            {
+                float height_val = Mathf.InverseLerp(fake_min, fake_max, vertices[count].y);
+                colors[count] = gradient.Evaluate(height_val);
+                count++;
+            }
+
         mesh.Clear();
-        // mesh.subMeshCount = 2; // 2 меша, 0 - основная текстура с градиентом, 1 - черные линии
+        //mesh.subMeshCount = 2; // 2 меша, 0 - основная текстура с градиентом, 1 - черные линии
         mesh.vertices = vertices;
         mesh.triangles = triangles;
-        // mesh.colors = colors;
+        //mesh.SetTriangles(triangles, 0);
+        mesh.colors = colors;
         mesh.RecalculateNormals();
-        mesh.RecalculateBounds();
+        mesh.Optimize();
+        //mesh.RecalculateBounds();
 
-        // mesh.SetIndices(triangles, MeshTopology.Lines, 1);
+        //mesh.SetIndices(triangles, MeshTopology.Lines, 1);
     }
 
     private void OnDrawGizmos()

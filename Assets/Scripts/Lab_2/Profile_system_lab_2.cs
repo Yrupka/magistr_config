@@ -34,6 +34,7 @@ public class Profile_system_lab_2 : MonoBehaviour
         transform.Find("Get").GetComponent<Button>().onClick.AddListener(() => StartCoroutine(Get_file()));
         transform.Find("Exit").GetComponent<Button>().onClick.AddListener(Exit);
         items_list = new List<Toggle>();
+        FileBrowser.SetFilters( false, new FileBrowser.Filter( "Таблицы", ".txt"), new FileBrowser.Filter( "Профиль", ".json") );
 
         Profiles_load();
     }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
+using System.Text;
 using UnityEngine;
 
 public static class File_controller
@@ -93,31 +93,75 @@ public static class File_controller
 
     public static void Save_table_lab_2(string[,] data, string path)
     {
-        string str = "";
+        string str = "Обороты\tМомент\tРасход\tУгол\tНагрузка\n";
         for (int i = 0; i < data.GetLength(0); i++)
         {
-            for (int j = 0; j < 5; j++)
-                str += data[i, j] + " ";
-            str += '\n';
+            for (int j = 0; j < 4; j++)
+                str += data[i, j] + "\t";
+            str += data[i, 4] + '\n';
         }
-        str = str.Remove(str.Length - 2); // удаление пустой последней строки и последнего пробела на предпоследней
-        File.WriteAllText(path, str);
+        File.WriteAllText(path, str, Encoding.Unicode);
     }
 
     public static string[,] Load_table_lab_2(string path)
     {
-        string[] strings = File.ReadAllLines(path);
-        string[,] data = new string[strings.Length, 5];
+        string[] strings = File.ReadAllLines(path, Encoding.Unicode);
+        string[,] data = new string[strings.Length - 1, 5];
 
-        for (int i = 0; i < strings.Length; i++)
+        // на первом месте надписи
+        for (int i = 1; i < strings.Length; i++)
         {
-            if (i == strings.Length - 1)
-                strings[i] += ' ';
-            string[] str = strings[i].Split(' ');
-            if (str.Length - 1 != 5) // последний элемент это пустое место
-                return null;
-            for (int j = 0; j < str.Length - 1; j++)
-                data[i, j] = str[j];                
+            string[] str = strings[i].Split('\t');
+            if (str.Length != 5)
+                continue;
+            for (int j = 0; j < str.Length; j++)
+                data[i - 1, j] = str[j];
+        }
+        return data;
+    }
+
+    public static void Save_questions(string [,] data, string path)
+    {
+        string str = "Номер\nБалл\nТекст\nОтветы\n";
+        for (int i = 0; i < data.GetLength(0); i++)
+        {
+            str += (i + 1).ToString() + '\n';
+            for (int j = 0; j < 3; j++)
+                str += data[i, j] + '\n';
+        }
+        File.WriteAllText(path, str, Encoding.Unicode);
+    }
+
+    public static string[,] Load_questions(string path)
+    {
+        string[] strings = File.ReadAllLines(path, Encoding.Unicode);
+        List<string[]> raw_data = new List<string[]>();
+        // на первом месте надписи
+        for (int i = 5, count = 0; i < strings.Length; i += 2)
+        {
+            string[] item = new string[3];
+            item[0] = strings[i + 0];
+            item[1] = strings[i + 1];
+            string answers = "";
+            i += 2;
+            if (i >= strings.Length)
+                goto x;
+            while(!string.IsNullOrEmpty(strings[i]))
+            {
+                answers += strings[i] + '\n';
+                i++;
+            }
+            x:
+            item[2] = answers;
+            raw_data.Add(item);
+            count++;
+        }
+        string[,] data = new string[raw_data.Count, 3];
+        for (int i = 0; i < raw_data.Count; i++)
+        {
+            data[i, 0] = raw_data[i][0];
+            data[i, 1] = raw_data[i][1];
+            data[i, 2] = raw_data[i][2];
         }
         return data;
     }

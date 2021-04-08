@@ -34,11 +34,14 @@ public class Question : MonoBehaviour
 
     private void Delete()
     {
-        int index = answers_list.FindIndex(x => x.GetComponent<Toggle>().isOn == true);
-        if (index == -1) // если ничего не выбрано -> удалить последний
-            index = answers_list.Count - 1;
-        Destroy(answers_list[index].transform.parent.gameObject); // удалить сам ответ а не toggle
-        answers_list.RemoveAt(index);
+        if (answers_list.Count != 0) // если нет элементов на удаление, то ничего не делать
+        {
+            int index = answers_list.FindIndex(x => x.GetComponent<Toggle>().isOn == true);
+            if (index == -1) // если ничего не выбрано -> удалить последний
+                index = answers_list.Count - 1;
+            Destroy(answers_list[index].transform.parent.gameObject); // удалить сам ответ а не toggle
+            answers_list.RemoveAt(index);
+        }
     }
 
     public (string, List<string>, int) Get_data()
@@ -57,7 +60,6 @@ public class Question : MonoBehaviour
 
     public void Set_data(string text_info, List<string> answers, int score_num)
     {
-        Init();
         text.text = text_info;
         for (int i = 0; i < answers.Count; i++)
         {

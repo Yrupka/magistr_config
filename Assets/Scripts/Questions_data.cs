@@ -9,4 +9,8 @@ public class Questions_data
     public string text;
     public List<string> answers;
 
+    public Questions_data()
+    {
+        answers = new List<string>();
+    }
 }
