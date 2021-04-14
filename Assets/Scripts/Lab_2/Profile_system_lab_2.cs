@@ -16,6 +16,7 @@ public class Profile_system_lab_2 : MonoBehaviour
     private Button btn_delete;
     private Button btn_change;
     private Button btn_choose;
+    private Button btn_get;
     private List<Toggle> items_list;
     public GameObject profile;
 
@@ -31,7 +32,8 @@ public class Profile_system_lab_2 : MonoBehaviour
         btn_change.onClick.AddListener(Profile_change);
         btn_choose = transform.Find("Choose").GetComponent<Button>();
         btn_choose.onClick.AddListener(Profile_choose);
-        transform.Find("Get").GetComponent<Button>().onClick.AddListener(() => StartCoroutine(Get_file()));
+        btn_get = transform.Find("Get").GetComponent<Button>();
+        btn_get.onClick.AddListener(() => StartCoroutine(Get_file()));
         transform.Find("Exit").GetComponent<Button>().onClick.AddListener(Exit);
         items_list = new List<Toggle>();
         FileBrowser.SetFilters( false, new FileBrowser.Filter( "Таблицы", ".txt"), new FileBrowser.Filter( "Профиль", ".json") );
@@ -73,7 +75,6 @@ public class Profile_system_lab_2 : MonoBehaviour
             name_engine = "д";
         Item_add(name_car + "-" + name_engine);
         options.Add(new Engine_options_lab_2(name_engine, name_car));
-        Data_update(choosed_profile);
     }
 
     private void Item_add(string name)
@@ -98,7 +99,7 @@ public class Profile_system_lab_2 : MonoBehaviour
         if (choosed_profile > current_profile_index)
             choosed_profile--;
         Data_update(choosed_profile);
-            
+        Selected(false);
     }
 
     private void Profile_change()
@@ -113,6 +114,7 @@ public class Profile_system_lab_2 : MonoBehaviour
     {
         choosed_profile = items_list.FindIndex(x => x.isOn == true);
         profile_current.text = options[choosed_profile].car_name + "-" + options[choosed_profile].engine_name;
+        Data_update(choosed_profile);
     }
 
     private void Profile_update()
@@ -144,9 +146,16 @@ public class Profile_system_lab_2 : MonoBehaviour
     private void Data_update(int index)
     {
         if (index == -1)
+        {
             profile_current.text = "Выберите профиль";
+            btn_get.interactable = false;
+        }
+            
         else
+        {
             profile_current.text = options[index].car_name + "-" + options[index].engine_name;
+            btn_get.interactable = true;
+        }  
     }
 
     private void Exit()
