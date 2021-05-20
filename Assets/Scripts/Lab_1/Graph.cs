@@ -25,7 +25,7 @@ public class Graph : MonoBehaviour
         game_object_list = new List<GameObject>();
     }
 
-    private void Create_label_x(int val, float pos)
+    private void Create_label_x(float val, float pos)
     {
         RectTransform labelX = Instantiate(label_template_x);
         labelX.SetParent(graph_container, false);
@@ -80,7 +80,7 @@ public class Graph : MonoBehaviour
         return game_object;
     }
 
-    public void Show_graph(List<int> label_x, List<float> label_y, int split_dot_number)
+    public void Show_graph(List<float> label_x, List<float> label_y, int split_dot_number)
     {
         int max_visible = label_y.Count;
 

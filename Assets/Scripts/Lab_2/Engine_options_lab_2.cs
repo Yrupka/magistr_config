@@ -7,13 +7,13 @@ public class Engine_options_lab_2
     [Serializable]
     public struct struct_rpms
     {
-        public int rpm;
+        public float rpm;
         public float moment;
         public float consumption;
         public float deg;
         public float load;
 
-        public struct_rpms(int rpm, float moment, float consumption, float deg, float load)
+        public struct_rpms(float rpm, float moment, float consumption, float deg, float load)
         {
             this.rpm = rpm;
             this.moment = moment;
@@ -77,9 +77,9 @@ public class Engine_options_lab_2
         return converted_rpms;
     }
 
-    public List<int> Get_list_rpm()
+    public List<float> Get_list_rpm()
     {
-        List<int> list = new List<int>();
+        List<float> list = new List<float>();
         foreach (struct_rpms rpm in rpms)
             list.Add(rpm.rpm);
         return list;

@@ -144,7 +144,6 @@ public class Profile_system_lab_1 : MonoBehaviour
 
     private void Data_update(int index)
     {
-        Debug.Log(index);
         if (index == -1)
         {
             profile_current.text = "Выберите профиль";

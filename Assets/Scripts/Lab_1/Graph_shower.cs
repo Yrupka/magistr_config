@@ -9,7 +9,7 @@ public class Graph_shower : MonoBehaviour
     private Dropdown dropdown;
     private Transform title;
 
-    private List<int> interpolated_x;
+    private List<float> interpolated_x;
     private List<float>[] graph_data;
     
     private int interpolation;
@@ -41,7 +41,7 @@ public class Graph_shower : MonoBehaviour
         }
     }
 
-    private void Moment_graphs(List<int> label_x, List<float> moments)
+    private void Moment_graphs(List<float> label_x, List<float> moments)
     {
         graph_data[0] = Calculation_formulas.Interpolated_y(
                     label_x, moments, interpolated_x);
@@ -52,13 +52,13 @@ public class Graph_shower : MonoBehaviour
             label_x, moments, interpolated_x);
     }
 
-    private void Consumption_graphs(List<int> label_x, List<float> consumptions)
+    private void Consumption_graphs(List<float> label_x, List<float> consumptions)
     {
         graph_data[2] = Calculation_formulas.Interpolated_y(
                     label_x, consumptions, interpolated_x);
     }
 
-    private void Moment_and_consumption_graph(List<int> label_x, List<float> moments, List<float> consumptions)
+    private void Moment_and_consumption_graph(List<float> label_x, List<float> moments, List<float> consumptions)
     {
         for (int i = 0; i < moments.Count; i++)
             moments[i] *= label_x[i] / 9550f / consumptions[i] * 3.6f;
@@ -68,7 +68,7 @@ public class Graph_shower : MonoBehaviour
 
     public void Calculate_graphs(Engine_options_lab_1 options, int graph_num)
     {
-        List<int> label_x = options.Get_list_rpm();
+        List<float> label_x = options.Get_list_rpm();
         interpolation = options.interpolation;
         interpolated_x = Calculation_formulas.Interpolated_x(
             options.Get_list_rpm(), interpolation);

@@ -50,16 +50,16 @@ public class Graph_3d : MonoBehaviour
 
         // x.Sort();
 
-        y_normalize = new List<float>();
-        y_points = 4;
+        y_points = 2;
+        y_points += 2; // минимально должны быть точка минимума и максимума
         height = 3f;
         graph_offset = 0.5f;
         line_offset = 0.4f;
         step_min_x = 0.1f;
         step_min_z = 0.1f;
         label_x = "Обороты";
-        label_y = "Нагрузка";
-        label_z = "Угол опережения";
+        label_y = "Угол опережения";
+        label_z = "Нагрузка";
 
         //Create_graph(x, random, z);
     }
@@ -76,18 +76,22 @@ public class Graph_3d : MonoBehaviour
                     cam.transform.localPosition += new Vector3(1, 0, 1);
                 if (Input.mouseScrollDelta.y == -1)
                     cam.transform.localPosition -= new Vector3(1, 0, 1);
-
             }
         }
     }
 
     public void Create_graph(List<float> x, List<float> y, List<float> z)
     {
+        y_normalize = new List<float>();
         float max_y = Mathf.Max(y.ToArray());
         float min_y = Mathf.Min(y.ToArray());
 
         foreach (float item in y)
             y_normalize.Add(item / max_y * height);
+
+        float min = Mathf.Min(y_normalize.ToArray());
+        for (int i = 0; i < y_normalize.Count; i++)
+            y_normalize[i] -= min;
 
         // количество точек по осям без дубликатов
         List<float> converted_x = x.Distinct().ToList();
@@ -181,10 +185,11 @@ public class Graph_3d : MonoBehaviour
         float y_offset = Mathf.Sqrt(Mathf.Pow(graph_offset, 2) * 2f) / 1.5f; // отступ от графика на расстояние гипотенузы треугольника со сторонами отступа
         GameObject lab_y = Instantiate(text, transform);
         lab_y.GetComponent<TextMesh>().text = label_y;
-        lab_y.transform.localPosition = new Vector3(-(y_offset + 0.2f), 0.5f,-(y_offset + 0.2f));
+        lab_y.transform.localPosition = new Vector3(-(y_offset + 0.2f), 0.5f, -(y_offset + 0.2f));
         lab_y.transform.Rotate(Vector3.up, 45);
 
         float step = height / y_points;
+        float procent = 1f / (y_points - 1);
         for (int i = 0; i < y_points; i++)
         {
             GameObject instanse = Instantiate(text, transform);
@@ -193,7 +198,7 @@ public class Graph_3d : MonoBehaviour
 
             position.y = i * step + instanse.transform.localScale.y * 1.5f; // + половина высоты текста
             instanse.transform.localPosition = position;
-            instanse.GetComponent<TextMesh>().text = Mathf.Lerp(min_y, max_y, (float)i / (height - 1)).ToString("#0.00");
+            instanse.GetComponent<TextMesh>().text = Mathf.Lerp(min_y, max_y, (float)i * procent).ToString("#0.00");
         }
     }
 
@@ -264,7 +269,7 @@ public class Graph_3d : MonoBehaviour
                 if (dots[pos - 1].Count > max_dot_count)
                     max_dot_count = dots[pos - 1].Count;
             }
-            dots[pos].Add(new dot() { x = z[i], y = y_normalize[i] });
+            dots[pos].Add(new dot() { x = z[i], y = y_normalize[i]});
         }
 
         // сортировка по возрастанию полученных точек
@@ -285,8 +290,6 @@ public class Graph_3d : MonoBehaviour
         vertices = new Vector3[vert_size];
         List<float> x_new = x.Distinct().ToList();
         x_new.Add(x_new.Last()); // дубль последнего
-        Debug.Log((diff_dots + 1) * (max_dot_count + 1));
-        Debug.Log(diff_dots.ToString() + " " + max_dot_count.ToString());
 
         // создание опорных точек для графика
         for (int i = 0, count = 0; i <= diff_dots; i++)
@@ -337,23 +340,10 @@ public class Graph_3d : MonoBehaviour
             }
 
         mesh.Clear();
-        //mesh.subMeshCount = 2; // 2 меша, 0 - основная текстура с градиентом, 1 - черные линии
         mesh.vertices = vertices;
         mesh.triangles = triangles;
-        //mesh.SetTriangles(triangles, 0);
         mesh.colors = colors;
         mesh.RecalculateNormals();
         mesh.Optimize();
-        //mesh.RecalculateBounds();
-
-        //mesh.SetIndices(triangles, MeshTopology.Lines, 1);
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (vertices == null)
-            return;
-        for (int i = 0; i < vertices.Length; i++)
-            Gizmos.DrawSphere(vertices[i], 0.1f);
     }
 }

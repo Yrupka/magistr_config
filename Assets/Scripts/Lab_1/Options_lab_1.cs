@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using SimpleFileBrowser;
-using System.Collections;
+
 
 public class Options_lab_1 : MonoBehaviour
 {
@@ -134,6 +135,13 @@ public class Options_lab_1 : MonoBehaviour
         if (graph_options.rpms.Count != 0)
         {
             graph_options.rpms.Sort((a, b) => a.rpm.CompareTo(b.rpm));
+            // удаление дубликатов
+            for (int i = 0; i < graph_options.rpms.Count - 1; i++)
+                if (graph_options.rpms[i].rpm == graph_options.rpms[i + 1].rpm)
+                {
+                    graph_options.rpms.RemoveAt(i + 1);
+                    i--;
+                }
             graph.Calculate_graphs(graph_options, graph_num);
         }
     }

@@ -69,9 +69,9 @@ public class Engine_options_lab_1
         return converted_rpms;
     }
 
-    public List<int> Get_list_rpm()
+    public List<float> Get_list_rpm()
     {
-        List<int> list = new List<int>();
+        List<float> list = new List<float>();
         foreach (struct_rpms rpm in rpms)
             list.Add(rpm.rpm);
         return list;

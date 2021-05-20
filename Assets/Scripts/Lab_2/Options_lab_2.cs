@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Collections;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using SimpleFileBrowser;
-using System.Collections;
 
 public class Options_lab_2 : MonoBehaviour
 {
@@ -120,44 +121,57 @@ public class Options_lab_2 : MonoBehaviour
 
     private void Graph_update()
     {
+        int interpolation = (int)input_inter.value;
         string[,] data = table.GetItems();
-        List<Engine_options_lab_2.struct_rpms> str = new List<Engine_options_lab_2.struct_rpms>(data.GetLength(0));
-        
-        // сортировка
-        for (int i = 0; i < data.GetLength(0); i++)
-            str.Add(new Engine_options_lab_2.struct_rpms(int.Parse(data[i, 0]), 0f, 0f,
-                float.Parse(data[i, 3]), float.Parse(data[i, 4])));
-        if (str.Count != 0)
-            str.Sort((a, b) => a.rpm.CompareTo(b.rpm));
-        
+        if (data.GetLength(0) == 0)
+            return;
+
         // подготовка массив для создания графика
         List<float> rpm = new List<float>();
         List<float> deg = new List<float>();
         List<float> load = new List<float>();
-        foreach (Engine_options_lab_2.struct_rpms item in str)
+
+        for (int i = 0; i < data.GetLength(0); i++)
         {
-            rpm.Add(item.rpm);
-            deg.Add(item.deg);
-            load.Add(item.load);
+            rpm.Add(float.Parse(data[i, 0]));
+            deg.Add(float.Parse(data[i, 3]));
+            load.Add(float.Parse(data[i, 4]));
         }
+
+        // сортировка по оси x
+        (rpm, deg, load) = Calculation_formulas.Sorting(rpm, deg, load);
+        
+        //1. интерполяция по оси z
+        (rpm, deg, load) = Calculation_formulas.interpolate_3d(rpm, deg, load, interpolation);
+
+        // сортировка по оси z
+        (load, deg, rpm) = Calculation_formulas.Sorting(load, deg, rpm);
+        
+        //2. интерполяция по оси x
+        (load, deg, rpm) = Calculation_formulas.interpolate_3d(load, deg, rpm, interpolation);
+
+        // 3. сортировка по оборотам
+        (rpm, deg, load) = Calculation_formulas.Sorting(rpm, deg, load);
+
+        // построение графика
         graph.Create_graph(rpm, deg, load);
     }
 
     IEnumerator Save_dialog()
-	{
-        FileBrowser.SetDefaultFilter( ".txt" );
-		yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.Files, false, null, "таблица_1.txt", "Сохранить файл данных", "Сохранить" );
+    {
+        FileBrowser.SetDefaultFilter(".txt");
+        yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.Files, false, null, "таблица_1.txt", "Сохранить файл данных", "Сохранить");
 
-		if(FileBrowser.Success)
+        if (FileBrowser.Success)
             File_controller.Save_table(table.GetItems(), FileBrowser.Result[0]);
     }
 
     IEnumerator Load_dialog()
-	{
-        FileBrowser.SetDefaultFilter( ".txt" );
-		yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.Files, false, null, null, "Выберите файл для загрузки", "Загрузить" );
+    {
+        FileBrowser.SetDefaultFilter(".txt");
+        yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.Files, false, null, null, "Выберите файл для загрузки", "Загрузить");
 
-		if(FileBrowser.Success)
+        if (FileBrowser.Success)
         {
             string[,] data = File_controller.Load_table(FileBrowser.Result[0], 2);
             if (data != null) // вставить всплывающее окно об ошибке

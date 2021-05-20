@@ -12,7 +12,7 @@ public class Dots : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         tooltip.gameObject.SetActive(false);
     }
 
-    public void Set_data(Vector2 position, Transform parent, int x, float y, Color color)
+    public void Set_data(Vector2 position, Transform parent, float x, float y, Color color)
     {
         transform.GetComponent<Image>().color = color;
         transform.SetParent(parent, false);
