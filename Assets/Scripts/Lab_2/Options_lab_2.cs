@@ -91,9 +91,15 @@ public class Options_lab_2 : MonoBehaviour
         float lever = float.Parse(input_l.text, culture);
         if (lever == 0)
             lever = 1;
-        options.fuel_amount = int.Parse(input_m.text, culture);
+        int fuel_amount = int.Parse(input_m.text, culture);
+        if (fuel_amount == 0)
+            fuel_amount = 1;
+        int heat_time = int.Parse(input_t.text);
+        if (heat_time == 0)
+            heat_time = 1;
+        options.fuel_amount = fuel_amount;
         options.lever_length = lever;
-        options.heat_time = int.Parse(input_t.text);
+        options.heat_time = heat_time;
         options.Set_rpms(table.GetItems());
         if (options.rpms.Count != 0)
             options.rpms.Sort((a, b) => a.rpm.CompareTo(b.rpm));

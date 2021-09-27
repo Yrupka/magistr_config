@@ -95,9 +95,15 @@ public class Options_lab_1 : MonoBehaviour
         float lever = float.Parse(input_l.text, culture);
         if (lever == 0)
             lever = 1;
-        options.fuel_amount = int.Parse(input_m.text, culture);
+        int fuel_amount = int.Parse(input_m.text, culture);
+        if (fuel_amount == 0)
+            fuel_amount = 1;
+        int heat_time = int.Parse(input_t.text);
+        if (heat_time == 0)
+            heat_time = 1;
+        options.fuel_amount = fuel_amount;
         options.lever_length = lever;
-        options.heat_time = int.Parse(input_t.text);
+        options.heat_time = heat_time;
         options.Set_rpms(table.GetItems());
         if (options.rpms.Count != 0)
             options.rpms.Sort((a, b) => a.rpm.CompareTo(b.rpm));
@@ -127,9 +133,9 @@ public class Options_lab_1 : MonoBehaviour
     }
 
     // обновить график по номеру (0-момента, мощности, 1-расхода, удельного расхода, 2 - обновить все)
-    private void Graph_update(int graph_num) 
+    private void Graph_update(int graph_num)
     {
-        Engine_options_lab_1 graph_options = new Engine_options_lab_1("","");
+        Engine_options_lab_1 graph_options = new Engine_options_lab_1("", "");
         graph_options.Set_rpms(table.GetItems());
         graph_options.interpolation = (int)input_inter.value;
         if (graph_options.rpms.Count != 0)
@@ -147,20 +153,20 @@ public class Options_lab_1 : MonoBehaviour
     }
 
     IEnumerator Save_dialog()
-	{
-        FileBrowser.SetDefaultFilter( ".txt" );
-		yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.Files, false, null, "таблица_1.txt", "Сохранить файл данных", "Сохранить" );
+    {
+        FileBrowser.SetDefaultFilter(".txt");
+        yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.Files, false, null, "таблица_1.txt", "Сохранить файл данных", "Сохранить");
 
-		if(FileBrowser.Success)
+        if (FileBrowser.Success)
             File_controller.Save_table(table.GetItems(), FileBrowser.Result[0]);
     }
 
     IEnumerator Load_dialog()
-	{
-        FileBrowser.SetDefaultFilter( ".txt" );
-		yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.Files, false, null, null, "Выберите файл для загрузки", "Загрузить" );
+    {
+        FileBrowser.SetDefaultFilter(".txt");
+        yield return FileBrowser.WaitForLoadDialog(FileBrowser.PickMode.Files, false, null, null, "Выберите файл для загрузки", "Загрузить");
 
-		if(FileBrowser.Success)
+        if (FileBrowser.Success)
         {
             string[,] data = File_controller.Load_table(FileBrowser.Result[0], 1);
             if (data != null) // вставить всплывающее окно об ошибке
