@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Graph_shower : MonoBehaviour
+public class Graph_shower_lab_3 : MonoBehaviour
 {
     private Graph graph;
 
@@ -22,10 +22,11 @@ public class Graph_shower : MonoBehaviour
         dropdown.AddOptions(new List<string>() {
             "Выберите..." , "Крутящий момент",
             "Мощность",  "Часовой расход топлива",
-            "Удельный расход топлива" });
+            "Удельный расход топлива",
+            "Расход воздуха"});
         dropdown.onValueChanged.AddListener(Graph_change);
-        graph_data = new List<float>[4];
-        for (int i = 0; i < 4; i++)
+        graph_data = new List<float>[5];
+        for (int i = 0; i < 5; i++)
             graph_data[i] = new List<float>();
     }
 
@@ -66,7 +67,13 @@ public class Graph_shower : MonoBehaviour
             label_x, moments, interpolated_x);
     }
 
-    public void Calculate_graphs(Engine_options_lab_1 options, int graph_num)
+    private void Air_graph(List<float> label_x, List<float> air)
+    {
+        graph_data[4] = Calculation_formulas.Interpolated_y(
+                    label_x, air, interpolated_x);
+    }
+
+    public void Calculate_graphs(Engine_options_lab_3 options, int graph_num)
     {
         List<float> label_x = options.Get_list_rpm();
         interpolation = options.interpolation;
@@ -86,7 +93,11 @@ public class Graph_shower : MonoBehaviour
             case 2:
                 Moment_graphs(label_x, options.Get_list_moment());
                 Consumption_graphs(label_x, options.Get_list_consumption());
-                break;   
+                Air_graph(label_x, options.Get_list_air());
+                break;
+            case 3:
+                Air_graph(label_x, options.Get_list_air());
+                break;
         }
         Moment_and_consumption_graph(label_x, options.Get_list_moment(), options.Get_list_consumption());
         Graph_change(dropdown.value);
@@ -95,7 +106,7 @@ public class Graph_shower : MonoBehaviour
     public void Clear_graphs()
     {
         dropdown.value = 0;
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < 5; i++)
             graph_data[i].Clear();
     }
 

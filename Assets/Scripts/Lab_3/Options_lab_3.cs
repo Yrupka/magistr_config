@@ -6,11 +6,11 @@ using UnityEngine.UI;
 using SimpleFileBrowser;
 
 
-public class Options_lab_1 : MonoBehaviour
+public class Options_lab_3 : MonoBehaviour
 {
-    private Table_lab_1 table;
-    private Engine_options_lab_1 options;
-    private Graph_shower_lab_1 graph;
+    private Table_lab_3 table;
+    private Engine_options_lab_3 options;
+    private Graph_shower_lab_3 graph;
     private Questions_list questions;
 
     private InputField input_m; // масса добавляемого топлива
@@ -31,12 +31,13 @@ public class Options_lab_1 : MonoBehaviour
 
     private void Awake() // нахождение всех полей
     {
-        table = transform.Find("Table").GetComponent<Table_lab_1>();
+        table = transform.Find("Table").GetComponent<Table_lab_3>();
         transform.Find("Table_save").GetComponent<Button>().onClick.AddListener(() => StartCoroutine(Save_dialog()));
         transform.Find("Table_load").GetComponent<Button>().onClick.AddListener(() => StartCoroutine(Load_dialog()));
         table.Add_listener_update_first(() => Graph_update(2));
         table.Add_listener_update_second(() => Graph_update(0));
         table.Add_listener_update_third(() => Graph_update(1));
+        table.Add_listener_update_fourth(() => Graph_update(3));
         input_m = transform.Find("Input_1").GetComponent<InputField>();
         input_l = transform.Find("Input_2").GetComponent<InputField>();
         input_t = transform.Find("Input_3").GetComponent<InputField>();
@@ -55,7 +56,7 @@ public class Options_lab_1 : MonoBehaviour
         hints_dropdown.AddOptions(new List<string>()
             { "Подсказка 1", "Подсказка 2", "Подсказка 3", "Подсказка 4"});
         hints_condition = transform.Find("Text_condition_5").GetComponent<Text>();
-        graph = transform.Find("Graph").GetComponent<Graph_shower_lab_1>();
+        graph = transform.Find("Graph").GetComponent<Graph_shower_lab_3>();
         transform.Find("Save_button").GetComponent<Button>().onClick.AddListener(Save);
         transform.Find("Load_button").GetComponent<Button>().onClick.AddListener(Load);
         transform.Find("Exit_button").GetComponent<Button>().onClick.AddListener(
@@ -132,10 +133,10 @@ public class Options_lab_1 : MonoBehaviour
         Graph_update(2);
     }
 
-    // обновить график по номеру (0-момента, мощности, 1-расхода, удельного расхода, 2 - обновить все)
+    // обновить график по номеру (0-момента, мощности, 1-расхода, удельного расхода, 2-расхода воздуха, 3 - обновить все)
     private void Graph_update(int graph_num)
     {
-        Engine_options_lab_1 graph_options = new Engine_options_lab_1("", "");
+        Engine_options_lab_3 graph_options = new Engine_options_lab_3("", "");
         graph_options.Set_rpms(table.GetItems());
         graph_options.interpolation = (int)input_inter.value;
         if (graph_options.rpms.Count != 0)
@@ -174,13 +175,13 @@ public class Options_lab_1 : MonoBehaviour
         }
     }
 
-    public void Set_profile(Engine_options_lab_1 profile)
+    public void Set_profile(Engine_options_lab_3 profile)
     {
         options = profile;
         Load();
     }
 
-    public Engine_options_lab_1 Get_profile()
+    public Engine_options_lab_3 Get_profile()
     {
         return options;
     }

@@ -11,6 +11,7 @@ public static class File_controller
         [SerializeField] private int _profile;
         [SerializeField] private Engine_options_lab_1[] _options_lab_1;
         [SerializeField] private Engine_options_lab_2[] _options_lab_2;
+        [SerializeField] private Engine_options_lab_3[] _options_lab_3;
         public json_format(int profile, Engine_options_lab_1[] options)
         {
             _profile = profile;
@@ -21,6 +22,11 @@ public static class File_controller
             _profile = profile;
             _options_lab_2 = options;
         }
+        public json_format(int profile, Engine_options_lab_3[] options)
+        {
+            _profile = profile;
+            _options_lab_3 = options;
+        }
         public Engine_options_lab_1[] get_options_lab_1()
         {
             return _options_lab_1 == null ? null : _options_lab_1;
@@ -28,6 +34,10 @@ public static class File_controller
         public Engine_options_lab_2[] get_options_lab_2()
         {
             return _options_lab_2 == null ? null : _options_lab_2;
+        }
+        public Engine_options_lab_3[] get_options_lab_3()
+        {
+            return _options_lab_3 == null ? null : _options_lab_3;
         }
         public int get_profile()
         {
@@ -48,6 +58,12 @@ public static class File_controller
         string data = JsonUtility.ToJson(json);
         File.WriteAllText(Application.dataPath + "\\data_2.json", data);
     }
+    public static void Save(int profile, List<Engine_options_lab_3> saveClass)
+    {
+        json_format json = new json_format(profile, saveClass.ToArray());
+        string data = JsonUtility.ToJson(json);
+        File.WriteAllText(Application.dataPath + "\\data_3.json", data);
+    }
 
     public static void Create_json(Engine_options_lab_1 options, string path)
     {
@@ -56,6 +72,12 @@ public static class File_controller
     }
 
     public static void Create_json(Engine_options_lab_2 options, string path)
+    {
+        string data = JsonUtility.ToJson(options);
+        File.WriteAllText(path, data);
+    }
+
+    public static void Create_json(Engine_options_lab_3 options, string path)
     {
         string data = JsonUtility.ToJson(options);
         File.WriteAllText(path, data);
@@ -91,6 +113,21 @@ public static class File_controller
         return (options, json.get_profile());
     }
 
+    public static (List<Engine_options_lab_3>, int) Load_lab_3()
+    {
+        if (!File.Exists(Application.dataPath + "\\data_3.json"))
+        {
+            return (null, -1);
+        }
+        string data = File.ReadAllText(Application.dataPath + "\\data_3.json");
+        json_format json = JsonUtility.FromJson<json_format>(data);
+        List<Engine_options_lab_3> options = new List<Engine_options_lab_3>();
+        Engine_options_lab_3[] opt = json.get_options_lab_3();
+        if (opt != null)
+            options.AddRange(json.get_options_lab_3());
+        return (options, json.get_profile());
+    }
+
     public static void Save_table(string[,] data, string path)
     {
         string str = "Обороты\tМомент\tРасход\t";
@@ -98,6 +135,8 @@ public static class File_controller
 
         if (count_rows == 5) // таблица второй лабораторной, 5 строк
             str += "Угол\tНагрузка\n";
+        if (count_rows == 4) // 3 лабораторная
+            str += "Воздух\n";
         
         for (int i = 0; i < data.GetLength(0); i++)
         {
@@ -111,12 +150,20 @@ public static class File_controller
     public static string[,] Load_table(string path, int lab_num)
     {
         string[] strings = File.ReadAllLines(path, Encoding.Unicode);
-        int count_rows;
+        int count_rows = 0;
 
-        if (lab_num == 1)
-            count_rows = 3;
-        else
-            count_rows = 5;
+        switch (lab_num)
+        {
+            case 1:
+                count_rows = 3;
+                break;
+            case 2:
+                count_rows = 5;
+                break;
+            case 3:
+                count_rows = 4;
+                break;
+        }
 
         string[,] data = new string[strings.Length - 1, count_rows];
 
