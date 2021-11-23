@@ -30,7 +30,7 @@ public class Graph : MonoBehaviour
         RectTransform labelX = Instantiate(label_template_x);
         labelX.SetParent(graph_container, false);
         labelX.gameObject.SetActive(true);
-        labelX.anchoredPosition = new Vector2(pos, -7f);
+        labelX.anchoredPosition = new Vector2(pos, -14f);
         labelX.GetComponent<Text>().text = val.ToString();
         game_object_list.Add(labelX.gameObject);
 

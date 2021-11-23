@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class Table_lab_3 : MonoBehaviour
 {
     private RectTransform content;
+    private ScrollRect cells_field;
     private List<GameObject> items_list; // хранение ячеек на сцене
     public GameObject prefab;
 
@@ -17,6 +18,7 @@ public class Table_lab_3 : MonoBehaviour
     private void Awake()
     {
         Transform window = transform.Find("Scroll_window");
+        cells_field = window.GetComponent<ScrollRect>();
         content = window.Find("Content").GetComponent<RectTransform>();
         transform.Find("Add_btn").GetComponent<Button>()
             .onClick.AddListener(() => AddItem());
@@ -24,8 +26,8 @@ public class Table_lab_3 : MonoBehaviour
             .onClick.AddListener(() => DeleteItem());
         transform.Find("Info1").GetComponent<Text>().text = "Номер";
         transform.Find("Info2").GetComponent<Text>().text = "Обороты (об/мин)";
-        transform.Find("Info3").GetComponent<Text>().text = "Часовой расход (гр/час)";
-        transform.Find("Info4").GetComponent<Text>().text = "Момент (H*м)";
+        transform.Find("Info3").GetComponent<Text>().text = "Момент (H*м)";
+        transform.Find("Info4").GetComponent<Text>().text = "Часовой расход (гр/час)";
         transform.Find("Info5").GetComponent<Text>().text = "Расход воздуха (л/мин)";
 
         items_list = new List<GameObject>();
@@ -42,6 +44,7 @@ public class Table_lab_3 : MonoBehaviour
     {
         Item item = new Item((items_list.Count + 1).ToString());
         CreateItem(item);
+        cells_field.horizontalNormalizedPosition = 1;
     }
 
     private void DeleteItem()

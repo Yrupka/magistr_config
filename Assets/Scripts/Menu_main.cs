@@ -9,6 +9,7 @@ public class Menu_main : MonoBehaviour
         Transform main = transform.Find("Main");
         main.Find("Lab_1").GetComponent<Button>().onClick.AddListener(Lab_1);
         main.Find("Lab_2").GetComponent<Button>().onClick.AddListener(Lab_2);
+        main.Find("Lab_3").GetComponent<Button>().onClick.AddListener(Lab_3);
         main.Find("Quit").GetComponent<Button>().onClick.AddListener(Quit);
     }
 
@@ -20,6 +21,11 @@ public class Menu_main : MonoBehaviour
     private void Lab_2()
     {
         SceneManager.LoadScene("Lab_2");
+    }
+
+    private void Lab_3()
+    {
+        SceneManager.LoadScene("Lab_3");
     }
 
     private void Quit()

@@ -67,19 +67,22 @@ public static class File_controller
 
     public static void Create_json(Engine_options_lab_1 options, string path)
     {
-        string data = JsonUtility.ToJson(options);
+        string data = "1\n";
+        data += JsonUtility.ToJson(options);
         File.WriteAllText(path, data);
     }
 
     public static void Create_json(Engine_options_lab_2 options, string path)
     {
-        string data = JsonUtility.ToJson(options);
+        string data = "2\n";
+        data += JsonUtility.ToJson(options);
         File.WriteAllText(path, data);
     }
 
     public static void Create_json(Engine_options_lab_3 options, string path)
     {
-        string data = JsonUtility.ToJson(options);
+        string data = "3\n";
+        data += JsonUtility.ToJson(options);
         File.WriteAllText(path, data);
     }
 
@@ -130,14 +133,15 @@ public static class File_controller
 
     public static void Save_table(string[,] data, string path)
     {
-        string str = "Обороты\tМомент\tРасход\t";
+        string str = "Обороты\tМомент\tРасход";
         int count_rows = data.GetLength(1);
 
         if (count_rows == 5) // таблица второй лабораторной, 5 строк
-            str += "Угол\tНагрузка\n";
+            str += "\tУгол\tНагрузка";
         if (count_rows == 4) // 3 лабораторная
-            str += "Воздух\n";
-        
+            str += "\tВоздух";
+        str += "\n";
+
         for (int i = 0; i < data.GetLength(0); i++)
         {
             for (int j = 0; j < count_rows - 1; j++)
