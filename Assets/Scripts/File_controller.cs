@@ -67,22 +67,19 @@ public static class File_controller
 
     public static void Create_json(Engine_options_lab_1 options, string path)
     {
-        string data = "1\n";
-        data += JsonUtility.ToJson(options);
+        string data = JsonUtility.ToJson(options);
         File.WriteAllText(path, data);
     }
 
     public static void Create_json(Engine_options_lab_2 options, string path)
     {
-        string data = "2\n";
-        data += JsonUtility.ToJson(options);
+        string data = JsonUtility.ToJson(options);
         File.WriteAllText(path, data);
     }
 
     public static void Create_json(Engine_options_lab_3 options, string path)
     {
-        string data = "3\n";
-        data += JsonUtility.ToJson(options);
+        string data = JsonUtility.ToJson(options);
         File.WriteAllText(path, data);
     }
 
