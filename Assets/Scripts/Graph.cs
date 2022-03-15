@@ -20,7 +20,7 @@ public class Graph : MonoBehaviour
         label_template_y = graph_container.Find("Label_y").GetComponent<RectTransform>();
         dash_template_x = graph_container.Find("Dash_x").GetComponent<RectTransform>();
         dash_template_y = graph_container.Find("Dash_y").GetComponent<RectTransform>();
-        
+
 
         game_object_list = new List<GameObject>();
     }
@@ -41,7 +41,7 @@ public class Graph : MonoBehaviour
         game_object_list.Add(dashX.gameObject);
     }
 
-    private void Create_labels_y(float hight, float max)
+    private void Create_labels_y(float hight, float min, float max)
     {
         float separatorCount = 10;
         for (float i = 0; i <= separatorCount; i++)
@@ -52,7 +52,7 @@ public class Graph : MonoBehaviour
             float normalizedValue = i / separatorCount;
             labelY.anchoredPosition = new Vector2(-7f, normalizedValue * hight);
 
-            labelY.GetComponent<Text>().text = (normalizedValue * max).ToString("0.00");
+            labelY.GetComponent<Text>().text = Mathf.Lerp(min, max, normalizedValue).ToString("0.00");
             game_object_list.Add(labelY.gameObject);
 
             RectTransform dashY = Instantiate(dash_template_y);
@@ -82,38 +82,64 @@ public class Graph : MonoBehaviour
 
     public void Show_graph(List<float> label_x, List<float> label_y, int split_dot_number)
     {
-        int max_visible = label_y.Count;
-
+        List<float> tmp_x = new List<float>(label_x);
         foreach (GameObject gameObject in game_object_list)
         {
             Destroy(gameObject);
         }
         game_object_list.Clear();
 
+        List<float> repeated_values_index = new List<float>();
+        // поиск количества повторений для каждого отдельного значения
+        // удаление этих значений в массиве значений по х
+        // перенос не дублирующихся значений из массива у в начало
+        // получится массив значений у, в котором вначале идут не дублирующих значения, а потом все остальные
+        int count_repeated = 0;
+        for (int i = 0; i < tmp_x.Count - 1; i++)
+        {
+            if (tmp_x[i] == tmp_x[i + 1])
+            {
+                count_repeated++;
+                tmp_x.RemoveAt(i + 1);
+                i--;
+            }
+            else
+            {
+                repeated_values_index.Add(count_repeated);
+                count_repeated = 0;
+            }
+        }
+        repeated_values_index.Add(count_repeated);
+
+        // выделить место нужно только для уникальных значений
+        int max_visible = label_y.Count;
+
         float graph_width = graph_container.sizeDelta.x;
         float graph_height = graph_container.sizeDelta.y;
 
         float max_y = Mathf.Max(label_y.ToArray()) + 1f;
+        float min_y = Mathf.Min(label_y.ToArray()) - 1f;
 
-        float size_x = graph_width / (max_visible + 1);
+        float size_x = graph_width / (repeated_values_index.Count + 1);
 
         GameObject last_circle_go = null;
-        for (int i = 0, red_dot = split_dot_number; i < max_visible; i++, red_dot++)
+        // расстановка уникальных точек
+        for (int i = 0, red_dot = split_dot_number, count = 0; i < max_visible; i++, red_dot++, count++)
         {
-            float position_x = size_x + i * size_x;
-            float position_y = label_y[i] / max_y * graph_height;
+            float position_x = size_x + count * size_x;
+            float position_y = Mathf.InverseLerp(min_y, max_y, label_y[i]) * graph_height;
 
             GameObject circle_go;
             Color color = Color.white;
             if (red_dot == split_dot_number)
             {
                 color = Color.red;
-                Create_label_x(label_x[i], position_x);
+                Create_label_x(tmp_x[count], position_x);
                 red_dot = 0;
             }
             circle_go = Instantiate(dot);
             circle_go.GetComponent<Dots>().Set_data(new Vector2(position_x, position_y),
-                    graph_container, label_x[i], label_y[i], color);
+                    graph_container, tmp_x[count], label_y[i], color);
             circle_go.transform.SetAsFirstSibling();
             game_object_list.Add(circle_go);
 
@@ -126,10 +152,20 @@ public class Graph : MonoBehaviour
                 game_object_list.Add(dot_connection_go);
             }
             last_circle_go = circle_go;
-
-
+            // рисование дублирующих значений у для того же опорного значения х
+            for (int j = 0; j < repeated_values_index[count]; j++)
+            {
+                i++;
+                GameObject circle_repeated;
+                circle_repeated = Instantiate(dot);
+                float pos_y = Mathf.InverseLerp(min_y, max_y, label_y[i]) * graph_height;
+                circle_repeated.GetComponent<Dots>().Set_data(new Vector2(position_x, pos_y),
+                        graph_container, tmp_x[count], label_y[i], color);
+                circle_repeated.transform.SetAsFirstSibling();
+                game_object_list.Add(circle_repeated);
+            }
         }
-        Create_labels_y(graph_height, max_y);
+        Create_labels_y(graph_height, min_y, max_y);
         graph_container.Find("Background").SetAsFirstSibling(); // нужно чтобы фон ничего не загораживал
     }
 }

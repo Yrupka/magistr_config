@@ -159,7 +159,7 @@ public class Options_lab_3 : MonoBehaviour
         yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.Files, false, null, "таблица_1.txt", "Сохранить файл данных", "Сохранить");
 
         if (FileBrowser.Success)
-            File_controller.Save_table(table.GetItems(), FileBrowser.Result[0]);
+            File_controller.Save_table(table.GetItems(), FileBrowser.Result[0], 3);
     }
 
     IEnumerator Load_dialog()

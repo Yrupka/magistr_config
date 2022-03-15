@@ -67,19 +67,22 @@ public static class File_controller
 
     public static void Create_json(Engine_options_lab_1 options, string path)
     {
-        string data = JsonUtility.ToJson(options);
+        string data = "1\n";
+        data += JsonUtility.ToJson(options);
         File.WriteAllText(path, data);
     }
 
     public static void Create_json(Engine_options_lab_2 options, string path)
     {
-        string data = JsonUtility.ToJson(options);
+        string data = "2\n";
+        data += JsonUtility.ToJson(options);
         File.WriteAllText(path, data);
     }
 
     public static void Create_json(Engine_options_lab_3 options, string path)
     {
-        string data = JsonUtility.ToJson(options);
+        string data = "3\n";
+        data += JsonUtility.ToJson(options);
         File.WriteAllText(path, data);
     }
 
@@ -128,14 +131,13 @@ public static class File_controller
         return (options, json.get_profile());
     }
 
-    public static void Save_table(string[,] data, string path)
+    public static void Save_table(string[,] data, string path, int lab_num)
     {
         string str = "Обороты\tМомент\tРасход";
         int count_rows = data.GetLength(1);
-
-        if (count_rows == 5) // таблица второй лабораторной, 5 строк
-            str += "\tУгол\tНагрузка";
-        if (count_rows == 4) // 3 лабораторная
+        if (lab_num == 2) // 2 лабораторная
+            str += "\tУгол";
+        if (lab_num == 3) // 3 лабораторная
             str += "\tВоздух";
         str += "\n";
 
@@ -159,7 +161,7 @@ public static class File_controller
                 count_rows = 3;
                 break;
             case 2:
-                count_rows = 5;
+                count_rows = 4;
                 break;
             case 3:
                 count_rows = 4;

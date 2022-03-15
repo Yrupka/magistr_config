@@ -83,15 +83,11 @@ public class Graph_3d : MonoBehaviour
     public void Create_graph(List<float> x, List<float> y, List<float> z)
     {
         y_normalize = new List<float>();
-        float max_y = Mathf.Max(y.ToArray());
-        float min_y = Mathf.Min(y.ToArray());
+        float max_y = y.Max();
+        float min_y = y.Min();
 
         foreach (float item in y)
-            y_normalize.Add(item / max_y * height);
-
-        float min = Mathf.Min(y_normalize.ToArray());
-        for (int i = 0; i < y_normalize.Count; i++)
-            y_normalize[i] -= min;
+            y_normalize.Add(Mathf.InverseLerp(min_y, max_y, item) * height);
 
         // количество точек по осям без дубликатов
         List<float> converted_x = x.Distinct().ToList();
@@ -137,7 +133,7 @@ public class Graph_3d : MonoBehaviour
     // настраевает камеру, для корректного отображения
     private void Set_position(int length_x, int length_z)
     {
-        float fake_min = Mathf.Min(y_normalize.ToArray());
+        float fake_min = y_normalize.Min();
         transform.localPosition = new Vector3(-length_x / 2, -fake_min, -length_z / 2);
         cam.transform.localPosition = new Vector3(-length_x / 2 - 2, height / 2, -length_z / 2 - 2);
         cam.transform.rotation = Quaternion.Euler(new Vector3(15f, 45f, 0f));
@@ -249,8 +245,11 @@ public class Graph_3d : MonoBehaviour
 
     private void Create_graph_object(List<float> x, List<float> z, int length_x, int length_z)
     {
-        // x - обороты (отсортированы по неубыванию), z - нагрузка
+        // максимальный и минимальный элемент нужны для расстановки всех точек на графике
+        float min = z.Min();
+        float max = z.Max();
 
+        // x - обороты (отсортированы по неубыванию), z - нагрузка
         int diff_dots = x.Distinct().Count();
         List<dot>[] dots = new List<dot>[diff_dots + 1];
         for (int i = 0; i < diff_dots + 1; i++)
@@ -298,7 +297,9 @@ public class Graph_3d : MonoBehaviour
             {
                 if (count > vert_size)
                     break;
-                float zz = Mathf.InverseLerp(dots[i].Min((a) => a.x), dots[i].Max((a) => a.x), dots[i][j].x);
+                // точки будут на одинаковом расстоянии друг от друга независимо от значений
+                //float zz = Mathf.InverseLerp(dots[i].Min((a) => a.x), dots[i].Max((a) => a.x), dots[i][j].x);
+                float zz = Mathf.InverseLerp(min, max, dots[i][j].x);
                 float xx = Mathf.InverseLerp(x_new.Min(), x_new.Max(), x_new[i]);
                 vertices[count] = new Vector3(Mathf.Lerp(0f, length_x - 1, xx), dots[i][j].y, Mathf.Lerp(0f, length_z - 1, zz));
                 count++;

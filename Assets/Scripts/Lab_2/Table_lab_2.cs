@@ -10,6 +10,10 @@ public class Table_lab_2 : MonoBehaviour
     private List<GameObject> items_list; // хранение ячеек на сцене
     public GameObject prefab;
 
+    private UnityAction action_first;
+    private UnityAction action_second;
+    private UnityAction action_third;
+
     private void Awake()
     {
         Transform window = transform.Find("Scroll_window");
@@ -22,9 +26,8 @@ public class Table_lab_2 : MonoBehaviour
         transform.Find("Info1").GetComponent<Text>().text = "Номер";
         transform.Find("Info2").GetComponent<Text>().text = "Обороты (об/мин)";
         transform.Find("Info3").GetComponent<Text>().text = "Момент (H*м)";
-        transform.Find("Info4").GetComponent<Text>().text = "Часовой расход (гр/час)";
+        transform.Find("Info4").GetComponent<Text>().text = "Часовой расход (гр/мин)";
         transform.Find("Info5").GetComponent<Text>().text = "УОЗ (град)";
-        transform.Find("Info6").GetComponent<Text>().text = "Нагрузка (H*м)";
 
         items_list = new List<GameObject>();
     }
@@ -60,10 +63,12 @@ public class Table_lab_2 : MonoBehaviour
         ItemModel model = new ItemModel(instanse.transform); // создаем по клону объект
         model.num.text = item.items[0];
         model.input1.text = item.items[1];
+        model.input1.onEndEdit.AddListener((val) => action_first());
         model.input2.text = item.items[2];
+        model.input2.onEndEdit.AddListener((val) => action_second());
         model.input3.text = item.items[3];
+        model.input3.onEndEdit.AddListener((val) => action_third());
         model.input4.text = item.items[4];
-        model.input5.text = item.items[5];
         items_list.Add(instanse);
     }
 
@@ -73,14 +78,14 @@ public class Table_lab_2 : MonoBehaviour
         for (int i = 0; i < items.GetLength(0); i++)
         {
             Item item = new Item(new string[] {(i + 1).ToString(), items[i, 0], items[i, 1],
-                items[i, 2], items[i, 3], items[i, 4]});
+                items[i, 2], items[i, 3]});
             CreateItem(item);
         }  
     }
 
     public string[,] GetItems()
     {
-        string[,] items = new string[items_list.Count, 5];
+        string[,] items = new string[items_list.Count, 4];
         int i = 0;
         foreach (GameObject obj in items_list)
         {
@@ -89,10 +94,24 @@ public class Table_lab_2 : MonoBehaviour
             items[i, 1] = item.input2.text;
             items[i, 2] = item.input3.text;
             items[i, 3] = item.input4.text;
-            items[i, 4] = item.input5.text;
             i++;
         }
         return items;
+    }
+
+    public void Add_listener_update_first(UnityAction action)
+    {
+        action_first += action;
+    }
+
+    public void Add_listener_update_second(UnityAction action)
+    {
+        action_second += action;
+    }
+
+    public void Add_listener_update_third(UnityAction action)
+    {
+        action_third += action;
     }
 
     public struct ItemModel
@@ -102,7 +121,6 @@ public class Table_lab_2 : MonoBehaviour
         public InputField input2;
         public InputField input3;
         public InputField input4;
-        public InputField input5;
 
         public ItemModel(Transform transform)
         {
@@ -111,7 +129,6 @@ public class Table_lab_2 : MonoBehaviour
             input2 = transform.Find("Field_2").GetComponent<InputField>();
             input3 = transform.Find("Field_3").GetComponent<InputField>();
             input4 = transform.Find("Field_4").GetComponent<InputField>();
-            input5 = transform.Find("Field_5").GetComponent<InputField>();
         }
     }
 
@@ -121,14 +138,14 @@ public class Table_lab_2 : MonoBehaviour
 
         public Item(string[] nums)
         {
-            items = new string[6];
+            items = new string[5];
             items = nums;
         }
         public Item(string num)
         {
-            items = new string[6];
+            items = new string[5];
             items[0] = num;
-            for (int i = 1; i < 6; i++)
+            for (int i = 1; i < 5; i++)
                 items[i] = "0";
         }
     }

@@ -27,7 +27,7 @@ public class Table_lab_3 : MonoBehaviour
         transform.Find("Info1").GetComponent<Text>().text = "Номер";
         transform.Find("Info2").GetComponent<Text>().text = "Обороты (об/мин)";
         transform.Find("Info3").GetComponent<Text>().text = "Момент (H*м)";
-        transform.Find("Info4").GetComponent<Text>().text = "Часовой расход (гр/час)";
+        transform.Find("Info4").GetComponent<Text>().text = "Часовой расход (гр/мин)";
         transform.Find("Info5").GetComponent<Text>().text = "Расход воздуха (л/мин)";
 
         items_list = new List<GameObject>();

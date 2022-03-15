@@ -109,7 +109,7 @@ public class Options_lab_1 : MonoBehaviour
             options.rpms.Sort((a, b) => a.rpm.CompareTo(b.rpm));
         options.interpolation = (int)input_inter.value;
         options.hints = hint_texts;
-        options.max_moment = graph.Get_max_moment();
+        options.max_moment = Mathf.Max((options.Get_list_moment().ToArray()));
         options.questions = questions.Get_questions();
     }
 
@@ -141,13 +141,6 @@ public class Options_lab_1 : MonoBehaviour
         if (graph_options.rpms.Count != 0)
         {
             graph_options.rpms.Sort((a, b) => a.rpm.CompareTo(b.rpm));
-            // удаление дубликатов
-            for (int i = 0; i < graph_options.rpms.Count - 1; i++)
-                if (graph_options.rpms[i].rpm == graph_options.rpms[i + 1].rpm)
-                {
-                    graph_options.rpms.RemoveAt(i + 1);
-                    i--;
-                }
             graph.Calculate_graphs(graph_options, graph_num);
         }
     }
@@ -158,7 +151,7 @@ public class Options_lab_1 : MonoBehaviour
         yield return FileBrowser.WaitForSaveDialog(FileBrowser.PickMode.Files, false, null, "таблица_1.txt", "Сохранить файл данных", "Сохранить");
 
         if (FileBrowser.Success)
-            File_controller.Save_table(table.GetItems(), FileBrowser.Result[0]);
+            File_controller.Save_table(table.GetItems(), FileBrowser.Result[0], 1);
     }
 
     IEnumerator Load_dialog()

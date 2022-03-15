@@ -11,15 +11,13 @@ public class Engine_options_lab_2
         public float moment;
         public float consumption;
         public float deg;
-        public float load;
 
-        public struct_rpms(float rpm, float moment, float consumption, float deg, float load)
+        public struct_rpms(float rpm, float moment, float consumption, float deg)
         {
             this.rpm = rpm;
             this.moment = moment;
             this.consumption = consumption;
             this.deg = deg;
-            this.load = load;
         }
     }
 
@@ -56,8 +54,7 @@ public class Engine_options_lab_2
             rpms.Add(new struct_rpms(int.Parse(rpm_val[i, 0]),
                 float.Parse(rpm_val[i, 1]),
                 float.Parse(rpm_val[i, 2]),
-                float.Parse(rpm_val[i, 3]),
-                float.Parse(rpm_val[i, 4])));
+                float.Parse(rpm_val[i, 3])));
         }
     }
 
@@ -71,7 +68,6 @@ public class Engine_options_lab_2
             converted_rpms[i, 1] = rpm.moment.ToString();
             converted_rpms[i, 2] = rpm.consumption.ToString();
             converted_rpms[i, 3] = rpm.deg.ToString();
-            converted_rpms[i, 4] = rpm.load.ToString();
             i++;
         }
         return converted_rpms;

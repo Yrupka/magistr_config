@@ -59,8 +59,61 @@ public static class Calculation_formulas
     public static List<float> Interpolated_y(List<float> x, List<float> y, List<float> x_for_calculate)
     {
         List<float> interpolated_y = new List<float>();
-        for (int i = 0; i < x_for_calculate.Count; i++)
-            interpolated_y.Add(Interpolate(x_for_calculate[i], x, y));
+        if (x.Count == 1)
+        {
+            interpolated_y.Add(y[0]);
+            return interpolated_y;
+        }
+        // при ситуации когда будут повторы в оборота
+        for (int i = 0; i < x_for_calculate.Count - 1; i++)
+        {
+            if (x_for_calculate[i] == x_for_calculate[i + 1])
+                interpolated_y.Add(y[i]);
+            else
+                interpolated_y.Add(Interpolate(x_for_calculate[i], x, y));
+        }
+        int count = x_for_calculate.Count - 1;
+        if (x_for_calculate[count] == x_for_calculate[count - 1])
+            interpolated_y.Add(y[count]);
+        else
+            interpolated_y.Add(Interpolate(x_for_calculate[count], x, y));
+
+        return interpolated_y;
+    }
+
+    // удаляет из массива дубликаты, интреполирует, возвращает дубликаты на свои места в результирующий массив
+    public static List<float> Interpolate_dublicate(List<float> x, List<float> y, List<float> x_for_calculate)
+    {
+        List<float> x_tmp = new List<float>(x);
+        List<float> y_tmp = new List<float>(y);
+        // сохранить значения для дублирующих значений оборотов
+        List<float> deleted_dublicate = new List<float>();
+        for (int i = 0; i < x_tmp.Count - 1; i++)
+        {
+            if (x_tmp[i] == x_tmp[i + 1])
+            {
+                // сохраняем удаленные значения
+                deleted_dublicate.Add(y_tmp[i + 1]);
+                // удаляем значение из массивов
+                y_tmp.RemoveAt(i + 1);
+                x_tmp.RemoveAt(i + 1);
+                i--;
+            }
+        }
+        // сохранить их индексы, где они находились ранее
+        List<int> deleted_index = new List<int>();
+        for (int i = 0; i < x_for_calculate.Count - 1; i++)
+            if (x_for_calculate[i] == x_for_calculate[i + 1])
+                deleted_index.Add(i + 1); // сохраняем индекс
+
+        List<float> interpolated_y = Interpolated_y(x_tmp, y_tmp, x_for_calculate.Distinct().ToList());
+
+        // возвращение повторяющихся значений обратно на свои места
+        for (int i = 0; i < deleted_index.Count; i++)
+        {
+            interpolated_y.Insert(deleted_index[i], deleted_dublicate[i]);
+        }
+
         return interpolated_y;
     }
 
@@ -96,24 +149,34 @@ public static class Calculation_formulas
         for (int i = 0; i < arr_1.Count; i++)
         {
             List<float> calculated_z = Calculation_formulas.Interpolated_x(arr_2[i], interpolation);
-            List<float> calculated_y = Calculation_formulas.Interpolated_y(arr_2[i], arr_1[i], calculated_z);
+            List<float> calculated_y = Calculation_formulas.Interpolate_dublicate(arr_2[i], arr_1[i], calculated_z);
+            // костыль, иногда пропускает значения программа, забить их 0, это только для 3д графика, на вычисления не влияет
+            if (calculated_y.Count < calculated_z.Count)
+            {
+                int cc = calculated_z.Count - calculated_y.Count;
+                for (int k = 0; k < cc; k++)
+                {
+                    calculated_y.Add(0);
+                }
+            }
+                
             for (int j = 0; j < calculated_z.Count; j++)
                 interpolated_x.Add(arr_3[i]);
             interpolated_y.AddRange(calculated_y);
             interpolated_z.AddRange(calculated_z);
         }
-
+        
         return (interpolated_x, interpolated_y, interpolated_z);
     }
 
     // функция для сортировки 3 массивов, используя первый массив как ключ
     public static (List<float>, List<float>, List<float>) Sorting(
         List<float> a, List<float> b, List<float> c)
-    {   
+    {
         List<triplet> store = new List<triplet>();
         for (int i = 0; i < a.Count; i++)
             store.Add(new triplet(a[i], b[i], c[i]));
-        
+
         store.Sort((first, second) => first.item_1.CompareTo(second.item_1));
 
         List<float> item_1 = new List<float>();
